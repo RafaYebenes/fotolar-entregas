@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "keywords": [],
-  "author": "Antigravity",
+  "author": "DevKomp",
   "license": "ISC",
   "devDependencies": {
     "vite": "^5.0.0"
