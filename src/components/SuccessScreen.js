@@ -82,28 +82,33 @@ function saveTicketAsPdf(orderCode) {
         alert("La librería html2pdf no está disponible.");
         return;
     }
-    
-    // 1. Clonar el elemento del ticket
+
+    // 1. Guardar la posición de desplazamiento actual y hacer scroll a 0
+    const currentScrollY = window.scrollY;
+    window.scrollTo(0, 0);
+
+    // 2. Clonar el elemento del ticket
     const clonedElement = originalElement.cloneNode(true);
     
-    // 2. Estilizar el clon para un renderizado perfecto
+    // 3. Estilizar el clon para un renderizado perfecto con colores estáticos (evitar variables CSS en html2canvas)
     clonedElement.style.position = 'absolute';
-    clonedElement.style.left = '-9999px';
+    clonedElement.style.left = '0';
     clonedElement.style.top = '0';
+    clonedElement.style.zIndex = '-9999';
     clonedElement.style.width = '380px'; // Ancho fijo óptimo para legibilidad uniforme
     clonedElement.style.boxShadow = 'none';
     clonedElement.style.border = '1px solid #cbd5e1';
     clonedElement.style.margin = '0';
     clonedElement.style.backgroundColor = '#ffffff';
     clonedElement.style.color = '#0f172a';
-    
-    // 3. Añadir al DOM
+
+    // 4. Añadir al DOM en la zona activa (pero oculta detrás de la app)
     document.body.appendChild(clonedElement);
     
     // Dar un breve tiempo para procesar en el DOM
     setTimeout(() => {
-        const width = clonedElement.offsetWidth;
-        const height = clonedElement.offsetHeight;
+        const width = clonedElement.offsetWidth || 380;
+        const height = clonedElement.offsetHeight || 600;
         
         const opt = {
             margin:       12, // Margen de seguridad en puntos
@@ -123,18 +128,22 @@ function saveTicketAsPdf(orderCode) {
             }
         };
         
-        // Generar PDF
+        // Generar PDF y restaurar el estado original al finalizar
         html2pdf().set(opt).from(clonedElement).save().then(() => {
-            // Eliminar clon
+            // Limpieza
             document.body.removeChild(clonedElement);
+            window.scrollTo(0, currentScrollY);
         }).catch(err => {
             console.error("Error al generar PDF: ", err);
             if (document.body.contains(clonedElement)) {
                 document.body.removeChild(clonedElement);
             }
+            window.scrollTo(0, currentScrollY);
         });
-    }, 50);
+    }, 100);
 }
+
+
 
 function sendTicketByEmail(name, email, phone, totalPhotos, totalCopies, totalPrice, orderCode) {
     const subject = `Reserva de Impresión Fotolar - Código: ${orderCode}`;

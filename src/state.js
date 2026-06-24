@@ -18,7 +18,7 @@ export const SIZE_LABELS = {
 const initialState = {
     files: [], // Array de objetos { id, file, previewUrl, name, size, quantity, paper }
     orderCode: '',
-    source: 'QR Entrada', // Origen por defecto
+    source: '', // Origen por defecto vacío
     kiosk: '',
     zipBlob: null,
     zipName: '',
