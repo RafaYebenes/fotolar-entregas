@@ -1,0 +1,17 @@
+{
+  "name": "fotolar-webapp",
+  "version": "1.0.0",
+  "description": "WebApp de auto-subida de fotos para Fotolar Córdoba",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "Antigravity",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}

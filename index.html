@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Subida de Fotos - Fotolar Córdoba | Impresión Profesional</title>
+    <meta name="description" content="Sube tus fotos de forma automática al entrar en nuestra tienda Fotolar Córdoba. Personaliza tus tamaños de impresión y envíalas por WhatsApp en un archivo ZIP al instante.">
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- JSZip Library from CDN (for client-side zipping of photos) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- FileSaver.js for reliable cross-browser downloads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <!-- html2pdf.js for client-side PDF generation of tickets -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+    <!-- Contenedor Principal (Vista Móvil centrada en Desktop) -->
+    <div class="app-container">
+        
+        <!-- Cabecera -->
+        <header>
+            <div class="logo-container">
+                <!-- Usando el logo oficial de fotolar.es en vivo -->
+                <img src="https://fotolar.es/images/fotolar-logo.png" alt="Fotolar" class="logo" id="header-logo">
+            </div>
+            <!-- Indicador de conexión por QR / NFC -->
+            <div class="source-badge" id="conn-badge" style="display: none;">
+                Conectado: <span id="conn-source">Mesa 1</span>
+            </div>
+        </header>
+
+        <!-- Sección de Bienvenida (Se oculta al cargar fotos) -->
+        <section class="welcome-section" id="welcome-section">
+            <h1 class="welcome-title">Imprime tus <span>Fotos</span></h1>
+            <p class="welcome-desc">Carga tu galería, selecciona el tamaño de impresión y recíbelas en el mostrador tras enviárnoslas en un archivo ZIP por WhatsApp.</p>
+            
+            <!-- Zona de Carga / Drag and Drop -->
+            <div class="upload-zone" id="drop-zone">
+                <div class="upload-icon">📷</div>
+                <h3>Selecciona tus fotos</h3>
+                <p>Arrastra imágenes aquí o toca para explorar</p>
+                <button type="button" class="btn-upload-file" id="btn-browse">Explorar Archivos</button>
+                <input type="file" id="file-input" multiple accept="image/*">
+                <div>
+                    <button type="button" class="demo-trigger" id="btn-demo">¿No tienes fotos? Probar fotos de muestra</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de la Galería (Activa cuando hay fotos cargadas) -->
+        <section class="gallery-section" id="gallery-section" style="display: none;">
+            <div class="gallery-header">
+                <h2 class="gallery-title">Tus Fotos (<span id="gallery-count">0</span>)</h2>
+                <button type="button" class="btn-add-more" id="btn-add-more">
+                    <span>+</span> Añadir más
+                </button>
+            </div>
+            
+            <!-- Grid de imágenes seleccionadas -->
+            <div class="photos-grid" id="photos-grid">
+                <!-- Las tarjetas de fotos se insertarán aquí dinámicamente -->
+            </div>
+        </section>
+
+        <!-- Pantalla de Éxito / Ticket (Se muestra al completar el pedido) -->
+        <section class="success-section" id="success-section" style="display: none;">
+            <div class="success-icon-container">✓</div>
+            <h1 class="success-title">¡Envío Completado!</h1>
+            <p class="success-desc">Tus fotos se han comprimido y enviado de forma transparente a nuestro mostrador de impresión en la tienda. A continuación tienes tu ticket de reserva.</p>
+            
+            <!-- Ticket de Recogida -->
+            <div class="ticket-wrapper" id="print-ticket">
+                <div class="ticket-header">
+                    <span class="brand-text">Fotolar</span>
+                    <span>TICKET DE RESERVA</span>
+                </div>
+                <div class="ticket-body">
+                    <div class="order-code-label">Código de Reserva</div>
+                    <div class="order-code-value" id="ticket-order-code">FL-0000</div>
+                    
+                    <!-- Código QR del ticket -->
+                    <div class="qr-code-container">
+                        <img src="" alt="QR Pedido" class="qr-code-img" id="ticket-qr">
+                    </div>
+                    
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                        Muestra este ticket o su código QR en el mostrador para cobrar e imprimir tus fotos.
+                    </p>
+                    
+                    <!-- Resumen del Ticket -->
+                    <div class="ticket-summary">
+                        <div class="ticket-summary-item">
+                            <span>Cliente:</span>
+                            <strong id="ticket-name">Juan Pérez</strong>
+                        </div>
+                        <div class="ticket-summary-item">
+                            <span>Total Fotos / Copias:</span>
+                            <strong id="ticket-copies">0 fotos / 0 copias</strong>
+                        </div>
+                        <div class="ticket-summary-item total">
+                            <span>Precio Total:</span>
+                            <span id="ticket-price">0,00 €</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acciones del Ticket -->
+            <div class="ticket-actions">
+                <button type="button" class="btn-pdf-download" id="btn-save-pdf">
+                    📥 Guardar Ticket como PDF
+                </button>
+                <button type="button" class="btn-email-send" id="btn-send-email">
+                    ✉️ Recibir Ticket en mi Correo
+                </button>
+            </div>
+            
+            <button type="button" class="btn-restart" id="btn-restart" style="margin-top: 16px;">
+                Empezar Nuevo Pedido
+            </button>
+        </section>
+
+        <!-- Badge Inferior Flotante (Calculador de precios) -->
+        <div class="bottom-badge" id="bottom-badge">
+            <div class="badge-info">
+                <span class="badge-total-count" id="badge-total-count">0 fotos - 0 copias</span>
+                <span class="badge-total-price" id="badge-total-price">0,00 €</span>
+            </div>
+            <button type="button" class="btn-confirm" id="btn-confirm">
+                Confirmar Pedido <span>→</span>
+            </button>
+        </div>
+
+        <!-- Pie de página (Inspirado en fotolar.es) -->
+        <footer>
+            <p>© 2026 Fotolar - Estudio Fotográfico Córdoba</p>
+            <p>Calle Lope de Hoces nº16, 14003 Córdoba | Tel: 957 295 030</p>
+            <p>WebApp de Auto-Subida para Atención en Mostrador</p>
+        </footer>
+    </div>
+
+    <!-- Modal / Drawer Deslizable para Formulario de Contacto -->
+    <div class="modal-backdrop" id="contact-modal">
+        <div class="modal-drawer">
+            <div class="modal-header">
+                <h3 class="modal-title">Detalles del Pedido</h3>
+                <button type="button" class="btn-close-modal" id="btn-close-modal">×</button>
+            </div>
+            <form id="order-form">
+                <div class="form-group">
+                    <label for="input-name">Nombre Completo *</label>
+                    <input type="text" id="input-name" class="form-control" placeholder="Ej: Juan Pérez" required>
+                </div>
+                <div class="form-group">
+                    <label for="input-email">Correo Electrónico *</label>
+                    <input type="email" id="input-email" class="form-control" placeholder="Ej: juan@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="input-phone">Teléfono / WhatsApp *</label>
+                    <input type="tel" id="input-phone" class="form-control" placeholder="Ej: 600123456" required pattern="[0-9]{9,12}">
+                </div>
+                <div class="form-group">
+                    <label for="input-notes">Notas para la impresión (opcional)</label>
+                    <textarea id="input-notes" class="form-control" rows="2" placeholder="Ej: ¿Podéis poner bordes blancos?"></textarea>
+                </div>
+                
+                <!-- Caja de resumen en el Modal -->
+                <div class="summary-box">
+                    <div id="summary-items-list">
+                        <!-- Desglose por tamaños dinámico -->
+                    </div>
+                    <div class="summary-row total">
+                        <span>Importe a Pagar en Mostrador:</span>
+                        <span id="summary-total-price">0,00 €</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    Comprimir y Pedir
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loader Overlay (Procesamiento ZIP y Simulación de Carga) -->
+    <div class="loader-overlay" id="loader-overlay">
+        <div class="loader-card">
+            <div class="loader-spinner"></div>
+            <h3 class="loader-title" id="loader-title">Procesando tus fotos...</h3>
+            <p class="loader-desc" id="loader-desc">Comprimiendo imágenes localmente en el dispositivo para un envío rápido.</p>
+            
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="progress-bar-fill"></div>
+            </div>
+            <div class="progress-percent" id="progress-percent">0%</div>
+            
+            <!-- Lista de ficheros siendo procesados -->
+            <div class="loader-files-list" id="loader-files-list">
+                Iniciando compresión...
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de lógica de negocio -->
+    <script src="app.js"></script>
+</body>
+</html>
