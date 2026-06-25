@@ -123,7 +123,7 @@ function handleOrderSubmit(e) {
         showLoader("Subiendo fotos...", "Cargando archivo ZIP en el servidor de Fotolar...", 60);
 
         setTimeout(() => {
-            updateLoaderProgress(85, "Enviando correo con el pedido a fotolar@fotolar.es...");
+            updateLoaderProgress(85, "Enviando correo con el pedido a yebenesrivera@gmail.com...");
             
             setTimeout(() => {
                 updateLoaderProgress(100, "¡Pedido enviado con éxito y archivado!");
