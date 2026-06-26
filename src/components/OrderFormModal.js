@@ -1,14 +1,11 @@
-import { getState, setClientInfo, setOrderDetails, SIZE_LABELS, getTotals, SIZE_PRICES } from '../state.js';
-import { generateOrderZip } from '../utils/zipHelper.js';
+import { getState, setClientInfo, setOrderDetails, SIZE_LABELS, SIZE_PRICES } from '../state.js';
 import { showLoader, updateLoaderProgress, hideLoader } from './LoaderOverlay.js';
 
 let elContactModal = null;
 let elBtnCloseModal = null;
 let elOrderForm = null;
 let elInputName = null;
-let elInputEmail = null;
 let elInputPhone = null;
-let elInputNotes = null;
 let elSummaryItemsList = null;
 let elSummaryTotalPrice = null;
 
@@ -17,23 +14,17 @@ export function initOrderFormModal() {
     elBtnCloseModal = document.getElementById('btn-close-modal');
     elOrderForm = document.getElementById('order-form');
     elInputName = document.getElementById('input-name');
-    elInputEmail = document.getElementById('input-email');
     elInputPhone = document.getElementById('input-phone');
-    elInputNotes = document.getElementById('input-notes');
     elSummaryItemsList = document.getElementById('summary-items-list');
     elSummaryTotalPrice = document.getElementById('summary-total-price');
 
     if (!elContactModal || !elBtnCloseModal || !elOrderForm) return;
 
-    // Listeners para cerrar el modal
     elBtnCloseModal.addEventListener('click', closeOrderFormModal);
     elContactModal.addEventListener('click', (e) => {
-        if (e.target === elContactModal) {
-            closeOrderFormModal();
-        }
+        if (e.target === elContactModal) closeOrderFormModal();
     });
 
-    // Envío de formulario
     elOrderForm.addEventListener('submit', handleOrderSubmit);
 }
 
@@ -41,23 +32,18 @@ export function openOrderFormModal() {
     const state = getState();
     if (state.files.length === 0) return;
 
-    // Generar desglose de precios agrupado por tamaño
     const sizeGroups = {};
     let totalPrice = 0;
 
     state.files.forEach(item => {
-        if (!sizeGroups[item.size]) {
-            sizeGroups[item.size] = { count: 0, price: 0 };
-        }
+        if (!sizeGroups[item.size]) sizeGroups[item.size] = { count: 0, price: 0 };
         sizeGroups[item.size].count += item.quantity;
-        
-        const unitPrice = SIZE_PRICES[item.size] || 0.25;
+        const unitPrice = SIZE_PRICES[item.size] || 0.30;
         const itemPrice = unitPrice * item.quantity;
         sizeGroups[item.size].price += itemPrice;
         totalPrice += itemPrice;
     });
 
-    // Renderizar desglose
     elSummaryItemsList.innerHTML = '';
     for (const size in sizeGroups) {
         const row = document.createElement('div');
@@ -74,77 +60,80 @@ export function openOrderFormModal() {
 }
 
 export function closeOrderFormModal() {
-    if (elContactModal) {
-        elContactModal.classList.remove('active');
-    }
+    if (elContactModal) elContactModal.classList.remove('active');
 }
 
-function handleOrderSubmit(e) {
+async function handleOrderSubmit(e) {
     e.preventDefault();
 
     const clientName = elInputName.value.trim();
-    const clientEmail = elInputEmail.value.trim();
     const clientPhone = elInputPhone.value.trim();
-    const clientNotes = elInputNotes.value.trim();
 
-    if (!clientName || !clientEmail || !clientPhone) return;
+    if (!clientName) { elInputName.focus(); return; }
+    if (!clientPhone) { elInputPhone.focus(); return; }
 
-    // Guardar detalles del cliente en el estado
-    setClientInfo({
-        name: clientName,
-        email: clientEmail,
-        phone: clientPhone,
-        notes: clientNotes
-    });
+    const state = getState();
+    if (state.files.length === 0) return;
 
+    setClientInfo({ name: clientName, phone: clientPhone });
     closeOrderFormModal();
-    showLoader("Empaquetando pedido...", "Comprimiendo tus fotos localmente...", 5);
 
-    // Generar código de pedido aleatorio para este ticket
     const randomNum = Math.floor(1000 + Math.random() * 9000);
     const orderCode = `FL-${randomNum}`;
 
-    const state = getState();
+    showLoader('Enviando fotos...', 'Preparando archivos para enviar por WhatsApp...', 5);
 
-    // Invocar el empaquetado ZIP
-    generateOrderZip({
-        files: state.files,
-        orderCode: orderCode,
-        client: { name: clientName, email: clientEmail, phone: clientPhone, notes: clientNotes },
-        source: state.source,
-        sizeLabels: SIZE_LABELS
-    }, (percent, statusText) => {
-        updateLoaderProgress(percent, statusText);
-    })
-    .then((zipBlob) => {
-        const zipName = `fotolar-pedido-${orderCode}.zip`;
-        
-        // Simular subida transparente de las fotos
-        showLoader("Subiendo fotos...", "Cargando archivo ZIP en el servidor de Fotolar...", 60);
+    // Construir FormData con todos los archivos
+    const formData = new FormData();
+    formData.append('orderCode', orderCode);
+    formData.append('nota', `Pedido ${orderCode} — ${clientName} — Tel: ${clientPhone}`);
+    for (const item of state.files) {
+        for (let i = 0; i < item.quantity; i++) {
+            formData.append('files', item.file, item.name);
+        }
+    }
 
-        setTimeout(() => {
-            updateLoaderProgress(85, "Enviando correo con el pedido a yebenesrivera@gmail.com...");
-            
-            setTimeout(() => {
-                updateLoaderProgress(100, "¡Pedido enviado con éxito y archivado!");
-                
-                setTimeout(() => {
-                    hideLoader();
-                    
-                    // Almacenamos el resultado en el estado
-                    // Esto disparará reactivamente la pantalla de éxito
-                    setOrderDetails({
-                        orderCode: orderCode,
-                        zipBlob: zipBlob,
-                        zipName: zipName
-                    });
-                }, 500);
-            }, 1000);
-        }, 1000);
-    })
-    .catch((err) => {
-        console.error("Error al generar el ZIP:", err);
-        showLoader("Error", "No se pudo generar el archivo comprimido: " + err.message, 0);
-        setTimeout(hideLoader, 3000);
-    });
+    updateLoaderProgress(20, 'Subiendo fotos al servidor...');
+
+    let data;
+    try {
+        const res = await fetch('/api/entregas/whatsapp', {
+            method: 'POST',
+            body: formData
+        });
+        try {
+            data = await res.json();
+        } catch {
+            throw new Error('Respuesta inesperada del servidor');
+        }
+    } catch (err) {
+        console.error('[WA] Error de red:', err);
+        hideLoader();
+        showLoader('Error de conexión', 'No se pudo contactar con el servidor. Comprueba que está activo.', 0);
+        setTimeout(hideLoader, 4000);
+        return;
+    }
+
+    if (!data.ok) {
+        hideLoader();
+        const mensaje = data.error === 'WA_SESSION_UNAVAILABLE'
+            ? 'WhatsApp no está conectado. Contacta con el administrador.'
+            : data.mensaje || 'Error al enviar. Inténtalo de nuevo.';
+        showLoader('Error al enviar', mensaje, 0);
+        setTimeout(hideLoader, 4000);
+        return;
+    }
+
+    // Éxito
+    const partes = data.partes > 1 ? ` (${data.partes} partes)` : '';
+    updateLoaderProgress(100, `¡Fotos enviadas por WhatsApp${partes}!`);
+
+    setTimeout(() => {
+        hideLoader();
+        setOrderDetails({
+            orderCode,
+            zipBlob: null,
+            zipName: `fotolar-pedido-${orderCode}.zip`
+        });
+    }, 800);
 }

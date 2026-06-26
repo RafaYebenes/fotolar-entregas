@@ -18,8 +18,7 @@ Origen Acceso: ${source}
 --------------------------------------------------
 DATOS DEL CLIENTE:
 Nombre: ${client.name}
-Teléfono/WhatsApp: ${client.phone}
-Notas Adicionales: ${client.notes || 'Ninguna'}
+Teléfono: ${client.phone}
 
 --------------------------------------------------
 DESGLOSE DE IMPRESIÓN POR ARCHIVO:
@@ -33,7 +32,7 @@ DESGLOSE DE IMPRESIÓN POR ARCHIVO:
             
             // Generar nombre descriptivo para el archivo dentro del ZIP que incluya la configuración
             const cleanName = item.name.replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_\.-]/g, '');
-            const zipFileName = `${(index+1).toString().padStart(2, '0')}_[${item.size}]_[${item.paper}]_[x${item.quantity}]_${cleanName}`;
+            const zipFileName = `${(index+1).toString().padStart(2, '0')}_[${item.size}]_[x${item.quantity}]_${cleanName}`;
             
             infoTxt += `
 [Foto ${index+1}]
@@ -41,7 +40,6 @@ Archivo original: ${item.name}
 Archivo en ZIP: ${zipFileName}
 Tamaño: ${sizeLabels[item.size] || item.size}
 Cantidad: ${item.quantity} copias
-Acabado Papel: ${item.paper.toUpperCase()}
 `;
             
             // Retornar promesa para leer el archivo e insertarlo en el ZIP

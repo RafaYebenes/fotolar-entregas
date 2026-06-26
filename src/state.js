@@ -1,22 +1,32 @@
-// Configuración de Precios de Impresión (en Euros por unidad)
+// Configuración de Precios de Impresión (en Euros por unidad — precios base fotolar.es)
 export const SIZE_PRICES = {
-    '10x15': 0.25,
-    '13x18': 0.35,
-    '15x20': 0.45,
-    '20x30': 0.95
+    '9x13':  0.28,
+    '10x15': 0.30,
+    '13x18': 0.80,
+    '15x20': 0.88,
+    '20x20': 1.50,
+    '20x25': 2.50,
+    '20x30': 3.00,
+    '30x30': 4.00,
+    '30x40': 4.99
 };
 
 // Nombres descriptivos de tamaños
 export const SIZE_LABELS = {
+    '9x13':  '9x13 cm',
     '10x15': '10x15 cm',
     '13x18': '13x18 cm',
     '15x20': '15x20 cm',
-    '20x30': '20x30 cm'
+    '20x20': '20x20 cm',
+    '20x25': '20x25 cm',
+    '20x30': '20x30 cm',
+    '30x30': '30x30 cm',
+    '30x40': '30x40 cm'
 };
 
 // Estado inicial de la aplicación
 const initialState = {
-    files: [], // Array de objetos { id, file, previewUrl, name, size, quantity, paper }
+    files: [], // Array de objetos { id, file, previewUrl, name, size, quantity }
     orderCode: '',
     source: '', // Origen por defecto vacío
     kiosk: '',
@@ -24,9 +34,7 @@ const initialState = {
     zipName: '',
     client: {
         name: '',
-        email: '',
-        phone: '',
-        notes: ''
+        phone: ''
     }
 };
 
@@ -59,7 +67,7 @@ export function addFiles(fileList) {
     for (let i = 0; i < fileList.length; i++) {
         const item = fileList[i];
         
-        let file, size = '10x15', quantity = 1, paper = 'brillo';
+        let file, size = '10x15', quantity = 1;
         
         if (item instanceof File) {
             file = item;
@@ -67,7 +75,6 @@ export function addFiles(fileList) {
             file = item.file;
             if (item.size) size = item.size;
             if (item.quantity) quantity = item.quantity;
-            if (item.paper) paper = item.paper;
         } else {
             continue;
         }
@@ -85,8 +92,7 @@ export function addFiles(fileList) {
             previewUrl: previewUrl,
             name: file.name,
             size: size,
-            quantity: quantity,
-            paper: paper
+            quantity: quantity
         });
         filesAdded++;
     }
@@ -110,14 +116,6 @@ export function updateFileSize(id, newSize) {
     const fileObj = appState.files.find(f => f.id === id);
     if (fileObj) {
         fileObj.size = newSize;
-        notify();
-    }
-}
-
-export function updateFilePaper(id, newPaper) {
-    const fileObj = appState.files.find(f => f.id === id);
-    if (fileObj) {
-        fileObj.paper = newPaper;
         notify();
     }
 }
@@ -165,9 +163,7 @@ export function restartOrder() {
     appState.zipName = '';
     appState.client = {
         name: '',
-        email: '',
-        phone: '',
-        notes: ''
+        phone: ''
     };
     
     notify();

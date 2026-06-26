@@ -655,6 +655,7 @@ header {
 
 .btn-submit {
     width: 100%;
+    min-height: 48px;
     background-color: var(--primary);
     color: var(--text-on-primary);
     border: none;
@@ -675,6 +676,51 @@ header {
     background-color: var(--primary-hover);
     box-shadow: var(--shadow-lg);
     transform: translateY(-1px);
+}
+
+.btn-whatsapp {
+    margin-top: 10px;
+    background-color: #25d366;
+    color: #fff;
+}
+
+.btn-whatsapp:hover {
+    background-color: #1ebe5d;
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+}
+
+.btn-whatsapp:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.wa-feedback {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md, 8px);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.wa-feedback--loading {
+    background-color: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.wa-feedback--success {
+    background-color: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.wa-feedback--error {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
 }
 
 /* Pantalla de Carga y Progreso (Loader Overlay) */

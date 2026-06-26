@@ -88,7 +88,6 @@ export function generateDemoFiles(onProgress, onComplete) {
                     name: sample.name,
                     size: '10x15',
                     quantity: 1 + index, // Variar cantidades para test
-                    paper: index === 1 ? 'mate' : 'brillo'
                 });
                 
                 loadedCount++;

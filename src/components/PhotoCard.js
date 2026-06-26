@@ -1,4 +1,4 @@
-import { SIZE_PRICES, deleteFile, updateFileSize, updateFilePaper, updateFileQuantity } from '../state.js';
+import { SIZE_PRICES, deleteFile, updateFileSize, updateFileQuantity } from '../state.js';
 
 export function createPhotoCard(item) {
     const card = document.createElement('div');
@@ -21,17 +21,15 @@ export function createPhotoCard(item) {
                 <div class="select-wrapper">
                     <label>Tamaño</label>
                     <select class="select-input size-select">
-                        <option value="10x15" ${item.size === '10x15' ? 'selected' : ''}>10x15 cm (0.25€)</option>
-                        <option value="13x18" ${item.size === '13x18' ? 'selected' : ''}>13x18 cm (0.35€)</option>
-                        <option value="15x20" ${item.size === '15x20' ? 'selected' : ''}>15x20 cm (0.45€)</option>
-                        <option value="20x30" ${item.size === '20x30' ? 'selected' : ''}>20x30 cm (0.95€)</option>
-                    </select>
-                </div>
-                <div class="select-wrapper">
-                    <label>Papel</label>
-                    <select class="select-input paper-select">
-                        <option value="brillo" ${item.paper === 'brillo' ? 'selected' : ''}>Brillo</option>
-                        <option value="mate" ${item.paper === 'mate' ? 'selected' : ''}>Mate</option>
+                        <option value="9x13"  ${item.size === '9x13'  ? 'selected' : ''}>9x13 cm (0,28€)</option>
+                        <option value="10x15" ${item.size === '10x15' ? 'selected' : ''}>10x15 cm (0,30€)</option>
+                        <option value="13x18" ${item.size === '13x18' ? 'selected' : ''}>13x18 cm (0,80€)</option>
+                        <option value="15x20" ${item.size === '15x20' ? 'selected' : ''}>15x20 cm (0,88€)</option>
+                        <option value="20x20" ${item.size === '20x20' ? 'selected' : ''}>20x20 cm (1,50€)</option>
+                        <option value="20x25" ${item.size === '20x25' ? 'selected' : ''}>20x25 cm (2,50€)</option>
+                        <option value="20x30" ${item.size === '20x30' ? 'selected' : ''}>20x30 cm (3,00€)</option>
+                        <option value="30x30" ${item.size === '30x30' ? 'selected' : ''}>30x30 cm (4,00€)</option>
+                        <option value="30x40" ${item.size === '30x40' ? 'selected' : ''}>30x40 cm (4,99€)</option>
                     </select>
                 </div>
             </div>
@@ -55,11 +53,6 @@ export function createPhotoCard(item) {
     const selectSize = card.querySelector('.size-select');
     selectSize.addEventListener('change', (e) => {
         updateFileSize(item.id, e.target.value);
-    });
-
-    const selectPaper = card.querySelector('.paper-select');
-    selectPaper.addEventListener('change', (e) => {
-        updateFilePaper(item.id, e.target.value);
     });
 
     const btnMinus = card.querySelector('.btn-qty-minus');

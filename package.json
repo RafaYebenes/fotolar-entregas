@@ -2,15 +2,31 @@
   "name": "fotolar-webapp",
   "version": "1.0.0",
   "description": "WebApp de auto-subida de fotos para Fotolar Córdoba",
-  "main": "index.html",
+  "type": "module",
+  "main": "server/app.js",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "node server/app.js",
+    "start": "npm run build && node server/app.js",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "pm2:reload": "pm2 reload fotolar-entregas",
+    "pm2:logs": "pm2 logs fotolar-entregas"
   },
   "keywords": [],
   "author": "DevKomp",
   "license": "ISC",
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^6.7.23",
+    "archiver": "^7.0.1",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "multer": "^1.4.5-lts.1",
+    "qrcode": "^1.5.4"
+  },
   "devDependencies": {
     "vite": "^5.0.0"
   }
