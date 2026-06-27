@@ -61,14 +61,23 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-html, body {
+html {
     font-family: var(--font-sans);
-    background-color: #0f172a; /* Fondo oscuro exterior en desktop */
+    background-color: #0f172a;
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: #0f172a;
     color: var(--text-main);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     overflow-x: hidden;
+    width: 100%;
 }
 
 /* Contenedor Principal (Simulador de móvil o fluido en desktop) */
@@ -468,8 +477,11 @@ header {
 .bottom-badge {
     position: fixed;
     bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
     width: 100%;
-    max-width: 600px; /* Para alinearse con el contenedor en desktop */
+    max-width: 384px;
     height: var(--badge-height);
     background-color: var(--surface-glass);
     backdrop-filter: blur(16px) saturate(180%);
@@ -1167,5 +1179,137 @@ footer a:hover {
 #print-ticket::before, #print-ticket::after {
     background-color: #f8fafc !important;
     border-color: #cbd5e1 !important;
+}
+
+/* ==========================================================================
+   RESPONSIVE — Mobile-first breakpoints
+   ========================================================================== */
+
+/* ── Teléfonos muy pequeños (< 360px) ── */
+@media (max-width: 359px) {
+    :root { --badge-height: 76px; }
+
+    .welcome-title { font-size: 1.6rem; }
+    .welcome-desc  { font-size: 0.85rem; }
+
+    .upload-zone   { padding: 24px 14px; }
+    .upload-icon   { font-size: 2.4rem; }
+    .upload-zone h3 { font-size: 0.95rem; }
+
+    .photo-card    { height: 120px; }
+    .photo-preview-container { width: 96px; }
+    .photo-name    { font-size: 0.72rem; max-width: 90px; }
+    .select-input  { font-size: 0.72rem; padding: 5px 6px; }
+    .item-price    { font-size: 0.78rem; }
+
+    .btn-qty       { width: 24px; height: 24px; font-size: 0.9rem; }
+    .qty-val       { width: 24px; font-size: 0.78rem; }
+
+    .badge-total-price { font-size: 1.2rem; }
+    .btn-confirm   { padding: 10px 16px; font-size: 0.85rem; }
+
+    header         { padding: 12px 14px; }
+    .gallery-section { padding: 0 14px; }
+}
+
+/* ── Teléfonos normales (360px – 767px) — estilos base ya cubren esto ── */
+
+/* ── Tablets y teléfonos grandes (768px+) ── */
+@media (min-width: 768px) {
+    :root { --badge-height: 90px; }
+
+    /* Ampliar el contenedor hasta 720px en tablets */
+    .app-container {
+        max-width: 720px;
+    }
+
+    /* Badge sigue el contenedor */
+    .bottom-badge {
+        max-width: 720px;
+    }
+
+    /* 2 columnas para las tarjetas de foto */
+    .photos-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    /* Tarjetas verticales en 2 columnas */
+    .photo-card {
+        height: auto;
+        flex-direction: column;
+    }
+
+    .photo-preview-container {
+        width: 100%;
+        height: 160px;
+    }
+
+    .photo-config {
+        padding: 12px 14px;
+    }
+
+    .photo-name { max-width: 100%; }
+
+    /* Modal como drawer más generoso */
+    .modal-drawer {
+        max-width: 720px;
+        padding: 28px 28px 40px 28px;
+    }
+
+    /* Cabecera más espaciada */
+    header { padding: 16px 28px; }
+    .gallery-section { padding: 0 28px; }
+    .welcome-section { padding: 32px 28px; }
+    .success-section { padding: 32px 28px; }
+    .welcome-title   { font-size: 2.4rem; }
+
+    .btn-confirm { padding: 14px 28px; font-size: 1rem; }
+    .badge-total-price { font-size: 1.6rem; }
+}
+
+/* ── Desktop (1024px+) ── */
+@media (min-width: 1024px) {
+    /* Volver a 600px en desktop: el app es un panel tipo móvil centrado */
+    .app-container  { max-width: 600px; }
+    .bottom-badge   { max-width: 600px; }
+
+    /* Una sola columna en el panel desktop */
+    .photos-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    /* Tarjetas horizontales como en móvil */
+    .photo-card {
+        height: 140px;
+        flex-direction: row;
+    }
+
+    .photo-preview-container {
+        width: 120px;
+        height: 100%;
+    }
+
+    /* Modal centrado verticalmente en desktop (no drawer) */
+    .modal-backdrop {
+        align-items: center;
+    }
+
+    .modal-drawer {
+        max-width: 520px;
+        border-radius: var(--radius-lg);
+        margin-bottom: 0;
+    }
+
+    /* Hover más refinado en desktop */
+    .photo-card:hover { box-shadow: var(--shadow-lg); }
+    .btn-confirm:hover { transform: translateY(-2px); }
+}
+
+/* ── Pantallas muy anchas (1440px+) ── */
+@media (min-width: 1440px) {
+    .app-container { max-width: 640px; }
+    .bottom-badge  { max-width: 640px; }
 }
 
